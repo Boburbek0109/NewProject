@@ -29,15 +29,15 @@ struct ContentView: View {
                     Image(systemName: weatherSymbolName(for: weatherData?.condition))
                         //.symbolRenderingMode(.multicolor)
                         .resizable()
-                        .frame(width: 100, height: 100)
+                        .frame(width: 120, height: 120)
                     
                     Text("\(Date().formatted(.dateTime.day().month().weekday())) | \(Date().formatted(.dateTime.hour().minute()))")
                         .font(.title2)
                     
                     if let weatherData = weatherData {
                         Text("\(Int(weatherData.temperature.rounded()))°")
-                            .font(.title)
-                            .frame(width: 50)
+                            .font(.system(size: 60))
+                            //.frame(width: 150)
                     } else {
                         ProgressView()
                     }
@@ -118,7 +118,7 @@ struct ContentView: View {
                                         
                                         Image(systemName: "cloud.sun")
                                             .resizable()
-                                            .frame(width: 50, height: 50)
+                                            .frame(width: 40, height: 40)
                                         
                                         Text("25°")
                                     }
