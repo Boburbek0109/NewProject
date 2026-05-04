@@ -8,15 +8,17 @@
 import SwiftUI
 
 struct WeeklyWeather: View {
+    let dailyForecast: [DayWeather]
+    
     var body: some View {
         ZStack{
             LinearGradient(colors: [.cyan, .green, .indigo], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
             
             VStack{
-                TommorowView()
+                TomorrowView()
                 
-                DaysView()
+                DaysWeatherView(dailyForecast: dailyForecast)
                 
             }
         }
@@ -25,5 +27,5 @@ struct WeeklyWeather: View {
 
 
 #Preview {
-    WeeklyWeather()
+    WeeklyWeather(dailyForecast: [])
 }

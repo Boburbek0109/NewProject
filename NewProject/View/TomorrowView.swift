@@ -1,5 +1,5 @@
 //
-//  TommorowView.swift
+//  TomorrowView.swift
 //  NewProject
 //
 //  Created by Bobur Sobirjanov on 3/26/26.
@@ -7,7 +7,12 @@
 
 import SwiftUI
 
-struct TommorowView: View {
+struct TomorrowView: View {
+    
+    @State private var weatherService = WeatherService()
+    @StateObject private var locationManager = LocationManager()
+    @State private var weatherData: WeatherData?
+    
     var body: some View {
         
         ZStack{
@@ -74,5 +79,5 @@ struct TommorowView: View {
 
 
 #Preview {
-    TommorowView()
+    TomorrowView()
 }
