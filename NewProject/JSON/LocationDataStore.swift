@@ -22,7 +22,7 @@ struct LocationData: Decodable, Identifiable {
 }
 
 final class LocationDataStore: ObservableObject {
-    @Published private var locations: [LocationData] = []
+    @Published private(set) var locations: [LocationData] = []
 
     init() {
         loadData()

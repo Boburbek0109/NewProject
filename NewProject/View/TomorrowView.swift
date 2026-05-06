@@ -8,76 +8,81 @@
 import SwiftUI
 
 struct TomorrowView: View {
-    
-    @State private var weatherService = WeatherService()
-    @StateObject private var locationManager = LocationManager()
-    @State private var weatherData: WeatherData?
+
+    let day: DayWeather?
     
     var body: some View {
-        
-        ZStack{
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-                .padding(.horizontal)
-                .frame(height: 350)
-            
-            VStack{
-                HStack{
-                    Image(systemName: "cloud.snow.fill")
-                        .resizable()
-                        .frame(width: 120, height: 150)
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .leading){
-                        Text("Tommorow")
-                            .font(.title)
-                        Text("25°")
-                            .font(.system(size: 50))
-                        Text("Mostly Cloud")
-                            .font(.title)
-                    }
-                }
-                .padding(.horizontal, 30)
+        VStack{
+            HStack{
+                Image(systemName: day?.iconName ?? "sun.max.fill")
+                    .resizable()
+                    .symbolRenderingMode(.multicolor)
+                    .frame(width: 120, height: 120)
                 
+                Spacer()
                 
-                HStack(spacing: 30){
-                    VStack{
-                        Image("rain.umbrella")
-                            .resizable()
-                            .frame(width: 70, height: 70)
-                        
-                        Text("80%")
-                        Text("Rain")
-                    }
-                    //Spacer()
-                    
-                    VStack{
-                        Image("wind.speed")
-                            .resizable()
-                            .frame(width: 70, height: 70)
-                        Text("8km/h")
-                        Text("Wind Speed")
-                    }
-                    //Spacer()
-                    
-                    VStack{
-                        Image("humidity")
-                            .resizable()
-                            .frame(width: 70, height: 70)
-                        Text("60%")
-                        Text("Humidity")
-                    }
+                VStack(alignment: .leading){
+                    Text("Tomorrow")
+                        .font(.title)
+                    Text(day?.temperatureText ?? "--°")
+                        .font(.system(size: 50))
+                    Text(day?.condition ?? "Loading...")
+                        .font(.title)
                 }
-                .padding(.horizontal)
             }
-            .foregroundStyle(.white.gradient)
+            
+            HStack(spacing: 30){
+                
+                VStack{
+                    Image(systemName: "cloud.rain")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                    
+                    Text(day?.rainVolumeText ?? "--mm")
+                    Text("Rain")
+                }
+                
+                Divider()
+                    .frame(height: 50)
+                
+                VStack{
+                    Image(systemName: "wind")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                    Text(day?.windSpeedText ?? "--km/h")
+                    Text("Wind Speed")
+                }
+                
+                Divider()
+                    .frame(height: 50)
+                
+                VStack{
+                    Image(systemName: "humidity")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                    Text(day?.humidityText ?? "--%")
+                    Text("Humidity")
+                }
+            }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+        .padding()
+        .glassEffect(.clear, in: .rect(cornerRadius: 20))
+        .padding(.horizontal)
+        .shadow(color: .black.opacity(0.2), radius: 10, y: 6)
+        .shadow(color: .white.opacity(0.3), radius: 3, y: -2)
     }
 }
 
 
 #Preview {
-    TomorrowView()
+    TomorrowView(
+        day: DayWeather(
+            date: .now.addingTimeInterval(86400),
+            condition: "clear",
+            highTemp: 25,
+            lowTemp: 16,
+            humidity: 60,
+            windSpeed: 8,
+            rainVolume: 0.8)
+    )
 }

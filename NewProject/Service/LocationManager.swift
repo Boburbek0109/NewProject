@@ -5,8 +5,8 @@
 //  Created by Bobur Sobirjanov on 4/29/26.
 //
 
-import CoreLocation
 import Combine
+import CoreLocation
 
 
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate{
@@ -23,7 +23,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
     }
-    
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         location = locations.last

@@ -7,84 +7,46 @@
 
 import SwiftUI
 import CoreLocation
-import Combine
-
 
 struct ContentView: View {
 
-    private var weatherService = WeatherService()
     @StateObject private var locationManager = LocationManager()
-    @State private var weatherData: WeatherData?
+    @StateObject private var weatherVM = WeaherViewModel()
+    @StateObject private var locationStore = LocationDataStore()
     
     var body: some View {
+        let weatherPages = weatherVM.weatherPages
+        let selectedWeatherData = weatherPages.indices.contains(weatherVM.selectedWeatherPage)
+        ? weatherPages[weatherVM.selectedWeatherPage]
+        : weatherVM.weather
+        
         NavigationStack{
             ZStack{
-                LinearGradient(colors: [.cyan, .green, .indigo], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .ignoresSafeArea()
+                LinearGradient(colors: [Color(red: 0.98, green: 0.7, blue: 0.5),
+                                        Color(red: 0.95, green: 0.5, blue: 0.6),
+                                        Color(red: 0.5, green: 0.4, blue: 0.8)],
+                               startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
                 
-                VStack(alignment: .center, spacing: 10) {
-                    Text(weatherData?.condition ?? "Loading weather...")
-                        .font(.title)
-                    if let weatherData = weatherData {
-                        Text(weatherData.locationName)
-                            .font(.title2)
-                    }
-                    
-                    Image(systemName: weatherData?.iconName ?? "cloud.sun.fill")
-                        .symbolRenderingMode(.multicolor)
-                        .resizable()
-                        .frame(width: 96, height: 96)
-                    
-                    Text("\(Date().formatted(.dateTime.day().month().weekday())) | \(Date().formatted(.dateTime.hour().minute()))")
-                        .font(.title2)
-                    
-                    if let weatherData = weatherData {
-                        Text(weatherData.temperatureText)
-                            .font(.system(size: 60))
-                            .frame(width: 150)
-                    } else {
-                        ProgressView()
-                    }
-                    
-                    
-                    HStack(spacing: 8) {
-                        Text(weatherData?.highTempText ?? "H: --")
-                        Text(weatherData?.lowTempText ?? "L: --")
-                    }
-                    
-                    ZStack{
-                        RoundedRectangle(cornerRadius: 20)
-                            .glassEffect(.clear, in: .rect(cornerRadius: 20))
-                            .frame(height: 150)
-                        
-                    HStack(spacing: 30){
-                            WeatherMetricView(iconName: weatherData?.iconName ?? "sun.fill", value: weatherData?.rainVolumeText ?? "0.0mm", title: "Rain")
-                        
-                        Divider()
-                            .frame(height: 50)
-                            
-                            WeatherMetricView(iconName: "wind", value: weatherData?.windSpeedText ?? "0.0 km/h", title: "Wind\nSpeed")
-                        
-                        Divider()
-                            .frame(height: 50)
-                                                        
-                            WeatherMetricView(iconName: "humidity", value: weatherData?.humidityText ?? "0%", title: "Humidity")
-                            
-                        }
-                    }
-                    .padding(.horizontal)
+                VStack(alignment: .center, spacing: 20) {
+                    WeatherSummaryCarousel(
+                        weatherPages: weatherPages,
+                        selectedPage: $weatherVM.selectedWeatherPage)
+
+                    WeatherMetricPanel(weatherData: selectedWeatherData)
                     
                     HStack{
                         Text("Today")
-                            .font(.title)
+                            .font(.title2)
                             .foregroundStyle(Color.yellow)
                         
                         Spacer()
                         
                         NavigationLink("Next 7 days >") {
-                            WeeklyWeather(dailyForecast: weatherData?.dailyForecast ?? [])
+                            WeeklyWeather(dailyForecast: selectedWeatherData?.dailyForecast ?? [])
                         }
-                        .padding()
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
                         .glassEffect(.clear)
                         .foregroundColor(.white)
                         .font(.headline)
@@ -94,25 +56,40 @@ struct ContentView: View {
                     }
                     .padding(.horizontal)
                     
-                    HourlyWeatherView(hourlyWeather: weatherData?.hourlyForecast ?? [])
-                    
+                    HourlyWeatherView(hourlyWeather: selectedWeatherData?.hourlyForecast ?? [])
                     Spacer()
-                    
+                }
+                
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        HStack{
+                            Menu{
+                                ForEach(locationStore.locations) { location in
+                                    Button(location.name){
+                                        Task{
+                                            await weatherVM.addCityWeather(location)
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.title2)
+                                    .glassEffect(in: Circle())
+                            }
+                        }
+                    }
                 }
                 .onAppear {
                     locationManager.requestLocation()
                 }
                 .onReceive(locationManager.$location) { location in
                     guard let location else { return }
+                    guard weatherVM.weather == nil else { return}
                     Task{
-                        do{
-                            weatherData = try await weatherService.fetchWeather(
-                                lat: location.coordinate.latitude,
-                                lon: location.coordinate.longitude
-                            )
-                        } catch {
-                            print(error.localizedDescription)
-                        }
+                        await weatherVM.loadWeather(
+                            lat: location.coordinate.latitude,
+                            lon: location.coordinate.longitude
+                        )
                     }
                 }
             }

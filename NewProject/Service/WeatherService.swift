@@ -70,12 +70,21 @@ final class WeatherService {
             let highTemp = forecasts.map(\.main.tempMax).max() ?? 0
             let lowTemp = forecasts.map(\.main.tempMin).min() ?? 0
             let condition = forecasts.first?.weather.first?.description ?? "Unknown"
+            let humidity = forecasts.map(\.main.humidity).reduce(0, +) / max(forecasts.count, 1)
+            let windSpeed = forecasts.compactMap(\.wind?.speed).reduce(0, +) / Double(max(forecasts.count, 1))
+            let rainVolume = forecasts
+                .compactMap { $0.rain?.threeHour ?? $0.rain?.oneHour}
+                .reduce(0, +)
+            
             
             return DayWeather(
                 date: date,
                 condition: condition,
                 highTemp: highTemp,
-                lowTemp: lowTemp
+                lowTemp: lowTemp,
+                humidity: humidity,
+                windSpeed: windSpeed,
+                rainVolume: rainVolume
             )
         }
         
@@ -90,113 +99,9 @@ final class WeatherService {
             highTemp: highTemp,
             lowTemp: lowTemp,
             hourlyForecast: hourlyForecast,
-            dailyForecast: dailyForecast
+            dailyForecast: dailyForecast,
+            timezoneOffset: currentResponse.timezone
         )
         
     }
-    
-}
-
-struct WeatherData {
-    let locationName: String
-    let temperature: Double
-    let condition: String
-    let humidity: Int
-    let windSpeed: Double
-    let rainVolume: Double
-    let highTemp: Double
-    let lowTemp: Double
-    let hourlyForecast: [TimeModel]
-    let dailyForecast: [DayWeather]
-    
-}
-
-extension WeatherData{
-    var iconName: String {
-        TimeModel(date: .now, temperature: temperature, condition: condition)
-            .weatherSymbolNameDN(for: condition, at: .now)
-    }
-
-    var temperatureText: String {
-        "\(Int(temperature.rounded()))°"
-    }
-
-    var humidityText: String {
-        "\(humidity)%"
-    }
-
-    var windSpeedText: String {
-        "\(windSpeed.formatted(.number.precision(.fractionLength(1)))) km/h"
-    }
-
-    var rainVolumeText: String {
-        "\(rainVolume.formatted(.number.precision(.fractionLength(1)))) mm"
-    }
-    
-    var highTempText: String{
-        "H: \(Int(highTemp.rounded()))°"
-    }
-    
-    var lowTempText: String{
-        "L: \(Int(lowTemp.rounded()))°"
-    }
- }
-
-struct CurrentWeatherResponse: Decodable {
-    let name: String
-    let main: MainWeather
-    let weather: [WeatherCondition]
-    let wind: Wind
-    let rain: Rain?
-}
-
-struct MainWeather: Decodable {
-    let temp: Double
-    let humidity: Int
-    let tempMax: Double
-    let tempMin: Double
-    
-    enum CodingKeys: String, CodingKey{
-        case temp
-        case humidity
-        case tempMax = "temp_max"
-        case tempMin = "temp_min"
-    }
-    
-}
-
-struct WeatherCondition: Decodable {
-    let description: String
-}
-
-struct Wind: Decodable{
-    let speed: Double
-}
-
-struct Rain: Decodable{
-    let oneHour: Double?
-    let threeHour: Double?
-    
-    enum CodingKeys: String, CodingKey {
-        case oneHour = "1h"
-        case threeHour = "3h"
-    }
-}
-
-
-struct ForecastResponse: Decodable {
-    let list: [ForecastItem]
-    let city: ForecastCity
-}
-
-struct ForecastCity: Decodable{
-    let name: String
-}
-
-struct ForecastItem: Decodable{
-    let dt: TimeInterval
-    let main: MainWeather
-    let weather: [WeatherCondition]
-    let wind: Wind?
-    let rain: Rain?
 }

@@ -8,21 +8,23 @@
 import SwiftUI
 
 struct WeatherMetricView: View{
-
     let iconName: String
     let value: String
     let title: String
     
     var body: some View{
         
-        VStack{
+        VStack(spacing: 6){
             Image(systemName: iconName)
                 .resizable()
-                .frame(width: 45, height: 45)
+                .scaledToFit()
+                .frame(width: 32, height: 32)
             
             Text(value)
+                .font(.subheadline)
             Text(title)
+                .font(.caption)
+                .multilineTextAlignment(.center)
         }
     }
 }
-

@@ -13,17 +13,19 @@ struct HourlyWeatherCard: View{
     
     var body: some View{
         
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             Text(hourlyWeather.formatHour)
+                .font(.caption)
             
             Image(systemName: hourlyWeather.weatherSymbolNameDN(for: hourlyWeather.condition, at: hourlyWeather.date))
                 .resizable()
                 .scaledToFit()
-                .frame(width: 40, height: 40)
+                .frame(width: 34, height: 34)
             
             Text("\(Int(hourlyWeather.temperature.rounded()))°")
+                .font(.headline)
         }
-        .frame(width: 90, height: 150)
+        .frame(width: 80, height: 120)
         .glassEffect(.clear, in: .rect(cornerRadius: 20))
     }
 }

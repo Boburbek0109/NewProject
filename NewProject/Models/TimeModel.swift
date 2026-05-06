@@ -13,7 +13,7 @@ struct TimeModel: Identifiable {
     let condition: String?
     
     var id: Date { date }
-    
+  
     var formatHour: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "h a"
