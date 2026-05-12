@@ -44,7 +44,7 @@ The main goal was not only to build a weather UI, but also to understand how dif
 
 Helpful resource: 
 
-https://medium.com/better-programming/simple-weather-app-with-swiftui-ac41200a9d4d
-https://www.youtube.com/@seanallen
-bigmountainstudio.com
-AI
+- https://medium.com/better-programming/simple-weather-app-with-swiftui-ac41200a9d4d
+- https://www.youtube.com/@seanallen
+- bigmountainstudio.com
+- AI
