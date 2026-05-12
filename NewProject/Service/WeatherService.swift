@@ -19,7 +19,7 @@ protocol WeatherProviding {
 final class WeatherService: WeatherProviding {
     
     func fetchWeather(lat: Double, lon: Double) async throws -> WeatherData {
-        let apiKey = "abc25637c8e72d3b22aec85adb7ef927"
+        let apiKey = "YOUR_API_KEY_HERE"
         let forecastURLStr = "https://api.openweathermap.org/data/2.5/forecast?lat=\(lat)&lon=\(lon)&units=metric&appid=\(apiKey)"
         let weatherURLStr = "https://api.openweathermap.org/data/2.5/weather?lat=\(lat)&lon=\(lon)&units=metric&appid=\(apiKey)"
         
