@@ -17,7 +17,6 @@ func WeatherRow(day: String, icon: String, title: String, high: Int, low: Int) -
             .resizable()
             .frame(width: 26, height: 32)
             .symbolRenderingMode(.multicolor)
-//            .symbolEffect(.rotate, isActive: true)
         
         Text(title)
         

@@ -7,18 +7,26 @@
 
 import SwiftUI
 import CoreLocation
+import SwiftData
 
+@MainActor
 struct ContentView: View {
 
     @StateObject private var locationManager = LocationManager()
-    @StateObject private var weatherVM = WeaherViewModel()
+    @StateObject private var weatherVM = WeatherViewModel()
     @StateObject private var locationStore = LocationDataStore()
     
+    @Environment(\.modelContext) private var modelContext
+    @Query private var savedCities: [SavedCity]
+    
+    @State private var didRestoreSavedCity = false
+    
+    private var savedCityStore: SavedCityStore{
+        SavedCityStore(modelContext: modelContext, savedCities: savedCities)}
+    
+    
     var body: some View {
-        let weatherPages = weatherVM.weatherPages
-        let selectedWeatherData = weatherPages.indices.contains(weatherVM.selectedWeatherPage)
-        ? weatherPages[weatherVM.selectedWeatherPage]
-        : weatherVM.weather
+        let selectedWeatherData = weatherVM.selectedWeatherData
         
         NavigationStack{
             ZStack{
@@ -28,55 +36,48 @@ struct ContentView: View {
                                startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
                 
-                VStack(alignment: .center, spacing: 20) {
-                    WeatherSummaryCarousel(
-                        weatherPages: weatherPages,
-                        selectedPage: $weatherVM.selectedWeatherPage)
+                ScrollView{
+                    VStack(alignment: .center, spacing: 20) {
+                        WeatherSummaryCarousel(
+                            weatherPages: weatherVM.weatherPages,
+                            selectedPage: $weatherVM.selectedWeatherPage)
 
-                    WeatherMetricPanel(weatherData: selectedWeatherData)
-                    
-                    HStack{
-                        Text("Today")
-                            .font(.title2)
-                            .foregroundStyle(Color.yellow)
+                        WeatherMetricPanel(weatherData: selectedWeatherData)
                         
-                        Spacer()
-                        
-                        NavigationLink("Next 7 days >") {
-                            WeeklyWeather(dailyForecast: selectedWeatherData?.dailyForecast ?? [])
+                        HStack{
+                            Text("Today")
+                                .font(.title2)
+                                .foregroundStyle(Color.yellow)
+                            
+                            Spacer()
+                            
+                            NavigationLink("Next 7 days >") {
+                                WeeklyWeather(dailyForecast: weatherVM.selectedDailyForecast)
+                            }
+                            .disabled(!weatherVM.canOpenWeeklyForecast)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .glassEffect(.clear)
+                            .foregroundColor(.white)
+                            .font(.headline)
+                            .cornerRadius(10)
+                            
+                            
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .glassEffect(.clear)
-                        .foregroundColor(.white)
-                        .font(.headline)
-                        .cornerRadius(10)
+                        .padding(.horizontal)
                         
-                        
+                        HourlyWeatherView(hourlyWeather: weatherVM.selectedHourlyForecast)
+                        Spacer()
                     }
-                    .padding(.horizontal)
-                    
-                    HourlyWeatherView(hourlyWeather: selectedWeatherData?.hourlyForecast ?? [])
-                    Spacer()
+                }
+                .refreshable {
+                    savedCityStore.clearSavedCity()
+                    await weatherVM.refreshWeather()
                 }
                 
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        HStack{
-                            Menu{
-                                ForEach(locationStore.locations) { location in
-                                    Button(location.name){
-                                        Task{
-                                            await weatherVM.addCityWeather(location)
-                                        }
-                                    }
-                                }
-                            } label: {
-                                Image(systemName: "plus")
-                                    .font(.title2)
-                                    .glassEffect(in: Circle())
-                            }
-                        }
+                        cityMenu
                     }
                 }
                 .onAppear {
@@ -86,13 +87,37 @@ struct ContentView: View {
                     guard let location else { return }
                     guard weatherVM.weather == nil else { return}
                     Task{
-                        await weatherVM.loadWeather(
-                            lat: location.coordinate.latitude,
-                            lon: location.coordinate.longitude
-                        )
+                        await weatherVM.loadWeather(location: location)
+                    }
+                }
+                .task {
+                    guard !didRestoreSavedCity else { return }
+                    didRestoreSavedCity = true
+                    
+                    guard  let location = savedCityStore.selectedLocation else { return }
+                    
+                    await weatherVM.addCityWeather(location)
+                    weatherVM.selectedWeatherPage = weatherVM.weather == nil ? 0 : 1
+                }
+            }
+        }
+    }
+    
+    private var cityMenu: some View{
+        Menu{
+            ForEach(locationStore.locations) { location in
+                Button(location.name){
+                    savedCityStore.selectedCity(location)
+                    
+                    Task{
+                        await weatherVM.addCityWeather(location)
                     }
                 }
             }
+        } label: {
+            Image(systemName: "plus")
+                .font(.title2)
+                .glassEffect(in: Circle())
         }
     }
 }
@@ -100,3 +125,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+

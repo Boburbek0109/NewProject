@@ -61,7 +61,7 @@ struct WeatherSummaryCarousel: View{
     WeatherSummaryCarousel(weatherPages: [
         WeatherData (locationName: "Seoul",
                      temperature: 24,
-                     condition: "clear",
+                     condiction: "clear",
                      humidity: 72,
                      windSpeed: 4.2,
                      rainVolume: 0,

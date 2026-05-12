@@ -36,15 +36,15 @@ struct HourlyWeatherView: View {
     let now = Date()
     HourlyWeatherView(
         hourlyWeather: [
-            TimeModel(date: now.addingTimeInterval(3600), temperature: 24, condition: "clouds"),
-            TimeModel(date: now.addingTimeInterval(7200), temperature: 23, condition: "rain"),
-            TimeModel(date: now.addingTimeInterval(10800), temperature: 23, condition: "clouds"),
-            TimeModel(date: now.addingTimeInterval(14400), temperature: 22, condition: "clear"),
-            TimeModel(date: now.addingTimeInterval(18000), temperature: 21, condition: "thunder"),
-            TimeModel(date: now.addingTimeInterval(21600), temperature: 21, condition: "clouds"),
-            TimeModel(date: now.addingTimeInterval(25200), temperature: 20, condition: "clear"),
-            TimeModel(date: now.addingTimeInterval(28800), temperature: 19, condition: "rain"),
-            TimeModel(date: now.addingTimeInterval(32400), temperature: 18, condition: "clouds")
+            TimeModel(date: now.addingTimeInterval(3600), temperature: 24, condiction: "clouds"),
+            TimeModel(date: now.addingTimeInterval(7200), temperature: 23, condiction: "rain"),
+            TimeModel(date: now.addingTimeInterval(10800), temperature: 23, condiction: "clouds"),
+            TimeModel(date: now.addingTimeInterval(14400), temperature: 22, condiction: "clear"),
+            TimeModel(date: now.addingTimeInterval(18000), temperature: 21, condiction: "thunder"),
+            TimeModel(date: now.addingTimeInterval(21600), temperature: 21, condiction: "clouds"),
+            TimeModel(date: now.addingTimeInterval(25200), temperature: 20, condiction: "clear"),
+            TimeModel(date: now.addingTimeInterval(28800), temperature: 19, condiction: "rain"),
+            TimeModel(date: now.addingTimeInterval(32400), temperature: 18, condiction: "clouds")
         ]
     )
 }

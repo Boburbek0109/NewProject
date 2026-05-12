@@ -11,7 +11,7 @@ struct WeatherData: Identifiable {
     let id = UUID()
     let locationName: String
     let temperature: Double
-    let condition: String
+    let condiction: String
     let humidity: Int
     let windSpeed: Double
     let rainVolume: Double
@@ -24,9 +24,26 @@ struct WeatherData: Identifiable {
 }
 
 extension WeatherData{
+    func renamed(to locationName: String) -> WeatherData {
+        WeatherData(locationName: locationName,
+                    temperature: temperature,
+                    condiction: condiction,
+                    humidity: humidity,
+                    windSpeed: windSpeed,
+                    rainVolume: rainVolume,
+                    highTemp: highTemp,
+                    lowTemp: lowTemp,
+                    hourlyForecast: hourlyForecast,
+                    dailyForecast: dailyForecast,
+                    timezoneOffset: timezoneOffset)
+    }
     var iconName: String {
-        TimeModel(date: .now, temperature: temperature, condition: condition)
-            .weatherSymbolNameDN(for: condition, at: .now)
+        TimeModel(
+            date: Date(),
+            temperature: temperature,
+            condiction: condiction,
+            timezoneOffset: timezoneOffset)
+            .weatherSymbolNameDN(for: condiction, at: Date())
     }
 
     var temperatureText: String {

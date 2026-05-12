@@ -26,7 +26,7 @@ struct TomorrowView: View {
                         .font(.title)
                     Text(day?.temperatureText ?? "--°")
                         .font(.system(size: 50))
-                    Text(day?.condition ?? "Loading...")
+                    Text(day?.condiction ?? "Loading...")
                         .font(.title)
                 }
             }
@@ -78,7 +78,7 @@ struct TomorrowView: View {
     TomorrowView(
         day: DayWeather(
             date: .now.addingTimeInterval(86400),
-            condition: "clear",
+            condiction: "clear",
             highTemp: 25,
             lowTemp: 16,
             humidity: 60,

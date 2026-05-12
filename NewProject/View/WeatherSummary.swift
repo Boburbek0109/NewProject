@@ -13,7 +13,7 @@ struct WeatherSummary: View{
     var body: some View{
         VStack(alignment: .center, spacing: 8) {
             
-            Text(weatherData?.condition ?? "Loading weather...")
+            Text(weatherData?.condiction ?? "Loading weather...")
                 .font(.title2)
             
             if let weatherData{
@@ -51,7 +51,7 @@ struct WeatherSummary: View{
     WeatherSummary(weatherData: WeatherData(
         locationName: "Seoul",
         temperature: 24,
-        condition: "clear",
+        condiction: "clear",
         humidity: 72,
         windSpeed: 4.2,
         rainVolume: 0,

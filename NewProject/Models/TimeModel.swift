@@ -10,18 +10,30 @@ import Foundation
 struct TimeModel: Identifiable {
     let date: Date
     let temperature: Double
-    let condition: String?
+    let condiction: String?
+    let timezoneOffset: Int
     
     var id: Date { date }
+    
+    init(date: Date, temperature: Double, condiction: String?, timezoneOffset: Int = TimeZone.current.secondsFromGMT()){
+        self.date = date
+        self.condiction = condiction
+        self.temperature = temperature
+        self.timezoneOffset = timezoneOffset
+    }
   
     var formatHour: String {
         let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(secondsFromGMT: timezoneOffset)
         formatter.dateFormat = "h a"
         return formatter.string(from: date)
     }
     
     func weatherSymbolNameDN(for condition: String?, at date: Date) -> String {
-        let hour = Calendar.current.component(.hour, from: date)
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: timezoneOffset) ?? .current
+        
+        let hour = calendar.component(.hour, from: date)
         let isDaytime = hour >= 6 && hour < 18
 
         guard let condition else {
@@ -31,7 +43,7 @@ struct TimeModel: Identifiable {
         let normalizedCondition = condition.lowercased()
 
         if normalizedCondition.contains("rain") || normalizedCondition.contains("drizzle") {
-            return isDaytime ? "cloud.rain.fill" : "cloud.rain.fill"
+            return "cloud.rain.fill"
         }
 
         if normalizedCondition.contains("clear") || normalizedCondition.contains("sun") {

@@ -15,8 +15,8 @@ struct DaysWeatherView: View {
         VStack(spacing: 20){
             ForEach(dailyForecast){ day in
                 WeatherRow(day: day.formatDay,
-                           icon: weatherSymbolName(for: day.condition),
-                           title: day.condition,
+                           icon: weatherSymbolName(for: day.condiction),
+                           title: day.condiction,
                            high: Int(day.highTemp.rounded()),
                            low: Int(day.lowTemp.rounded())
                 )
@@ -34,12 +34,12 @@ struct DaysWeatherView: View {
 #Preview {
     DaysWeatherView(
         dailyForecast: [
-            DayWeather(date: .now.addingTimeInterval(86400), condition: "clear", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
-            DayWeather(date: .now.addingTimeInterval(86400 * 2), condition: "rain", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
-            DayWeather(date: .now.addingTimeInterval(86400 * 3), condition: "thunder", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
-            DayWeather(date: .now.addingTimeInterval(86400 * 4), condition: "drizzle", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
-            DayWeather(date: .now.addingTimeInterval(86400 * 5), condition: "snow", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
-            DayWeather(date: .now.addingTimeInterval(86400 * 6), condition: "sun", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0)
+            DayWeather(date: .now.addingTimeInterval(86400), condiction: "clear", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
+            DayWeather(date: .now.addingTimeInterval(86400 * 2), condiction: "rain", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
+            DayWeather(date: .now.addingTimeInterval(86400 * 3), condiction: "thunder", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
+            DayWeather(date: .now.addingTimeInterval(86400 * 4), condiction: "drizzle", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
+            DayWeather(date: .now.addingTimeInterval(86400 * 5), condiction: "snow", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0),
+            DayWeather(date: .now.addingTimeInterval(86400 * 6), condiction: "sun", highTemp: 25, lowTemp: 17, humidity: 70, windSpeed: 9, rainVolume: 0)
         ]
     )
 }

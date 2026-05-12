@@ -17,7 +17,7 @@ struct HourlyWeatherCard: View{
             Text(hourlyWeather.formatHour)
                 .font(.caption)
             
-            Image(systemName: hourlyWeather.weatherSymbolNameDN(for: hourlyWeather.condition, at: hourlyWeather.date))
+            Image(systemName: hourlyWeather.weatherSymbolNameDN(for: hourlyWeather.condiction, at: hourlyWeather.date))
                 .resizable()
                 .scaledToFit()
                 .frame(width: 34, height: 34)

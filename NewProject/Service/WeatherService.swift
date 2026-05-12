@@ -12,7 +12,11 @@ enum WeatherServiceError: Error{
     case invalidResponse
 }
 
-final class WeatherService {
+protocol WeatherProviding {
+    func fetchWeather(lat: Double, lon: Double) async throws -> WeatherData
+}
+
+final class WeatherService: WeatherProviding {
     
     func fetchWeather(lat: Double, lon: Double) async throws -> WeatherData {
         let apiKey = "abc25637c8e72d3b22aec85adb7ef927"
@@ -39,52 +43,64 @@ final class WeatherService {
         let forecastResponse = try JSONDecoder().decode(ForecastResponse.self, from: forecastData)
         let currentResponse = try JSONDecoder().decode(CurrentWeatherResponse.self, from: weatherData)
         
-        let hourlyForecast = (0..<10).map { offset in
+        
+        var cityCalendar = Calendar.current
+        cityCalendar.timeZone = TimeZone(secondsFromGMT: currentResponse.timezone) ?? .current
+        
+        
+        let hourlyForecast: [TimeModel] = (0..<10).compactMap { offset in
             let forecastIndex = offset / 3
-            let forecast = forecastResponse.list[forecastIndex]
-            let date = Calendar.current.date(byAdding: .hour, value: offset, to: .now) ?? .now
+        
+            guard forecastResponse.list.indices.contains(forecastIndex) else {
+                return nil
+            }
             
+            let forecast = forecastResponse.list[forecastIndex]
+            let date = Calendar.current.date(byAdding: .hour, value: offset, to: Date()) ?? Date()
             return TimeModel(
                 date: date,
                 temperature: forecast.main.temp,
-                condition: forecast.weather.first?.description
+                condiction: forecast.weather.first?.description,
+                timezoneOffset: currentResponse.timezone
             )
             
         }
 
-        let calendar = Calendar.current
-        let todayForecast = forecastResponse.list.filter {
-            calendar.isDate(Date(timeIntervalSince1970: $0.dt), inSameDayAs: .now)
+        
+        let groupedForecast: [Date: [ForecastItem]] = Dictionary(grouping: forecastResponse.list) { item in
+            cityCalendar.startOfDay(for: Date(timeIntervalSince1970: item.dt))
         }
         
-        let dayForecasts = todayForecast.isEmpty ? forecastResponse.list : todayForecast
-        let highTemp = dayForecasts.map(\.main.tempMax).max() ?? currentResponse.main.tempMax
-        let lowTemp = dayForecasts.map(\.main.tempMin).min() ?? currentResponse.main.tempMin
-        
-        let dailyForecast = Dictionary(grouping: forecastResponse.list) { item in
-            calendar.startOfDay(for: Date(timeIntervalSince1970: item.dt))
+        let sortedForecast = groupedForecast.sorted { first, second in
+            first.key < second.key
         }
-        .sorted { $0.key < $1.key }
-        .prefix(7)
-        .map { date, forecasts in
-            let highTemp = forecasts.map(\.main.tempMax).max() ?? 0
-            let lowTemp = forecasts.map(\.main.tempMin).min() ?? 0
-            let condition = forecasts.first?.weather.first?.description ?? "Unknown"
-            let humidity = forecasts.map(\.main.humidity).reduce(0, +) / max(forecasts.count, 1)
-            let windSpeed = forecasts.compactMap(\.wind?.speed).reduce(0, +) / Double(max(forecasts.count, 1))
-            let rainVolume = forecasts
-                .compactMap { $0.rain?.threeHour ?? $0.rain?.oneHour}
+        
+        let firstSevenForecast = sortedForecast.prefix(7)
+        
+        let dailyForecast: [DayWeather] = firstSevenForecast.map { entry in
+            let date = entry.key
+            let forecast = entry.value
+            
+            let highTemp = forecast.map { $0.main.tempMax}.max() ?? 0
+            let lowTemp = forecast.map{ $0.main.tempMin}.min() ?? 0
+            let condiction = forecast.first?.weather.first?.description ?? "Unknown"
+            let humidity = forecast.map { $0.main.humidity}.reduce(0, +) / max(forecast.count, 1)
+            let windSpeed = forecast.compactMap { $0.wind?.speed}.reduce(0, +) / Double(max(forecast.count, 1))
+            let rainVolume = forecast
+                .compactMap { $0.rain?.threeHour ?? $0.rain?.oneHour }
                 .reduce(0, +)
             
             
             return DayWeather(
                 date: date,
-                condition: condition,
+                condiction: condiction,
                 highTemp: highTemp,
                 lowTemp: lowTemp,
                 humidity: humidity,
                 windSpeed: windSpeed,
-                rainVolume: rainVolume
+                rainVolume: rainVolume,
+                timezoneOffset: currentResponse.timezone
+                
             )
         }
         
@@ -92,12 +108,12 @@ final class WeatherService {
         return WeatherData(
             locationName: currentResponse.name,
             temperature: currentResponse.main.temp,
-            condition: currentResponse.weather.first?.description ?? "Unknown",
+            condiction: currentResponse.weather.first?.description ?? "Unknown",
             humidity: currentResponse.main.humidity,
             windSpeed: currentResponse.wind.speed,
             rainVolume: currentResponse.rain?.oneHour ?? 0,
-            highTemp: highTemp,
-            lowTemp: lowTemp,
+            highTemp: currentResponse.main.tempMax,
+            lowTemp: currentResponse.main.tempMin,
             hourlyForecast: hourlyForecast,
             dailyForecast: dailyForecast,
             timezoneOffset: currentResponse.timezone
